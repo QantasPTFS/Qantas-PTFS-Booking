@@ -16,7 +16,7 @@
 const SUPABASE_URL="https://hapdzsgczxsduiurlexe.supabase.co";
 const SUPABASE_KEY="sb_publishable_e50rgEbgNoIhLAc8TA30AA_lUcmRuoa";
 const SB_HEADERS={"apikey":SUPABASE_KEY,"Content-Type":"application/json"};
-async function sharedBookings(){const r=await fetch(SUPABASE_URL+"/rest/v1/bookings?select=*&flight_number=eq."+encodeURIComponent(flight.id)+"&status=eq.Booked&order=created_at.asc",{headers:SB_HEADERS});if(!r.ok)throw new Error(await r.text());return r.json()}
+async function sharedBookings(){const r=await fetch(SUPABASE_URL+"/rest/v1/bookings?select=*&flight_number=eq."+encodeURIComponent(flight.id)+"&order=created_at.asc",{headers:SB_HEADERS});if(!r.ok)throw new Error(await r.text());return r.json()}
 let flight={id:"QF808",from:"Perth",to:"Greater Rockford",aircraft:"A380",time:"6:10 PM AEST"};
 let adminToken=null;
 async function loadCurrentFlight(){try{const r=await fetch(SUPABASE_URL+"/rest/v1/flights?select=*&status=eq.Open&order=created_at.desc&limit=1",{headers:SB_HEADERS});if(!r.ok)throw new Error(await r.text());const d=await r.json();if(d.length)flight={id:d[0].flight_number,from:d[0].origin,to:d[0].destination,aircraft:d[0].aircraft,time:d[0].departure_time};}catch(e){console.error("Flight load failed",e)}}
@@ -90,36 +90,26 @@ async function passengerList(){
  app.innerHTML=`<div class="card"><span class="badge">${flight.id}</span><h2>Booked Passengers</h2><p class="route">${flight.from} → ${flight.to}</p><p class="muted">${flight.aircraft} • ${flight.time}<br>${all.length} passengers booked</p><p>${Object.entries(counts).map(([c,n])=>`<span class="badge">${c}: ${n}</span>`).join(" ")}</p>${all.map((x,i)=>`<div class="card" style="box-shadow:none"><b>${i+1}. ${x.username}</b><div class="summary">${x.cabin} • Seat ${x.seat}<br>Meal: ${x.meal}<br>Reference: ${x.booking_reference}</div></div>`).join("")}</div>`;
  }catch(e){app.innerHTML=`<div class="card"><h2>Booked Passengers</h2><p class="muted">Could not load shared bookings. Please refresh.</p></div>`}
 }
-async function myBookings(){
+function myBookings(){
   nav("bookings");
-  app.innerHTML=`<div class="card"><h2>My Bookings</h2><p class="muted">Loading active bookings...</p></div>`;
-  try{
-    const live=await sharedBookings();
-    const activeRefs=new Set(live.map(x=>x.booking_reference));
-    bookings=bookings.filter(b=>activeRefs.has(b.ref));
-    localStorage.setItem("qptfs_bookings",JSON.stringify(bookings));
-    if(!bookings.length){
-      app.innerHTML=`<div class="card"><h2>My Bookings</h2><p class="muted">You don't have any active bookings for this flight.</p><button class="btn primary" onclick="home()">Book a flight</button></div>`;
-      return;
-    }
-    app.innerHTML=`<div class="card"><h2>My Bookings</h2><p class="muted">Your active bookings for the current flight.</p>
-    ${bookings.map(b=>`<div class="card" style="box-shadow:none">
-      <span class="badge">${b.ref}</span>
-      <h3 class="route">${flight.from} → ${flight.to}</h3>
-      <div class="summary">
-        Passenger: <b>${b.name||"Passenger"}</b><br>
-        Aircraft: ${flight.aircraft}<br>
-        Departure: ${flight.time}<br>
-        Cabin: ${b.cabin}<br>
-        Seat: ${b.seat}<br>
-        Meal: ${b.meal}
-      </div>
-    </div>`).join("")}</div>`;
-  }catch(e){
-    app.innerHTML=`<div class="card"><h2>My Bookings</h2><p class="muted">Could not load your live bookings. Please refresh.</p></div>`;
+  if(!bookings.length){
+    app.innerHTML=`<div class="card"><h2>My Bookings</h2><p class="muted">You don't have any bookings yet.</p><button class="btn primary" onclick="home()">Book a flight</button></div>`;
+    return;
   }
+  app.innerHTML=`<div class="card"><h2>My Bookings</h2><p class="muted">Bookings saved on this browser.</p>
+  ${bookings.map(b=>`<div class="card" style="box-shadow:none">
+    <span class="badge">${b.ref}</span>
+    <h3 class="route">${flight.from} → ${flight.to}</h3>
+    <div class="summary">
+      Passenger: <b>${b.name||"Passenger"}</b><br>
+      Aircraft: ${flight.aircraft}<br>
+      Departure: ${flight.time}<br>
+      Cabin: ${b.cabin}<br>
+      Seat: ${b.seat}<br>
+      Meal: ${b.meal}
+    </div>
+  </div>`).join("")}</div>`;
 }
-
 function home(){nav("book");state={};app.innerHTML=`${tabs(0)}<div class="card"><span class="badge">${flight.id}</span><h2 class="route">${flight.from} → ${flight.to}</h2><p class="muted">${flight.aircraft}<br>${flight.time}</p><button class="btn primary" onclick="cabins()">Book flight</button></div>`}
 function cabins(){app.innerHTML=`${tabs(1)}<div class="card"><h2>Choose cabin</h2><div class="classes">${Object.keys(prices).map(c=>`<div class="choice" onclick="pickCabin('${c}')"><b>${c}</b><p>${prices[c]} points</p>${c==="Premium Economy"?"<small>A380 only</small>":""}</div>`).join("")}</div><p><button class="btn back" onclick="home()">Back</button></p></div>`}
 function pickCabin(c){state.cabin=c;seats()}
@@ -172,4 +162,5 @@ async function finish(){
 
 async function startSite(){await loadCurrentFlight();save();home();restoreUser()}
 startSite();
+</script></body></html>
 </script></body></html>
