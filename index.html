@@ -138,8 +138,8 @@ function aircraftKey(){
 function availableCabins(){
  const map={
   A380:["Economy","Premium Economy","Business","First"],
-  B747:["Economy","Premium Economy","Business","First"],
-  B787:["Economy","Premium Economy","Business"],
+  B747:["Economy","Business","First"],
+  B787:["Economy","Business"],
   A330:["Economy","Business"],
   B737:["Economy","Business"],
   A320:["Economy","Business"],
@@ -161,11 +161,9 @@ function cabinSeatRows(cabin){
  } else if(k==="B747"){
   if(cabin==="First") add(1,3,"First","Main",["A","F","K"]);
   if(cabin==="Business") add(4,9,"Business","Upper/Main",["A","C","|","H","K"]);
-  if(cabin==="Premium Economy") add(10,14,"Premium Economy","Main",["A","B","|","E","F","|","J","K"]);
   if(cabin==="Economy") add(20,35,"Economy","Main",["A","B","C","|","D","E","F","G","|","H","J","K"]);
  } else if(k==="B787"){
   if(cabin==="Business") add(1,6,"Business","Main",["A","E","|","F","K"]);
-  if(cabin==="Premium Economy") add(10,13,"Premium Economy","Main",["A","B","|","D","E","F","|","J","K"]);
   if(cabin==="Economy") add(20,34,"Economy","Main",["A","B","C","|","D","E","F","|","H","J","K"]);
  } else if(k==="A330"){
   if(cabin==="Business") add(1,6,"Business","Main",["A","C","|","H","K"]);
